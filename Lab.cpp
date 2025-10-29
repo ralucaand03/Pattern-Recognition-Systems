@@ -369,7 +369,67 @@ void compute_and_save_correlation_matrix(const Mat& I) {
 	file.close();
 	printf("Successfully computed and saved correlation matrix to %s\n", filename);
 }
+// --- Task 5 Core Function ---
+int get_linear_index(int row, int col) {
+	if (row < 0 || row >= IMGsize || col < 0 || col >= IMGsize) {
+		return -1; 
+	}
+	return row * IMGsize + col;
+}
+void analyze_feature_pair(const Mat& I, const Mat& C, int row1, int col1, int row2, int col2, const char* description) { 
+	int i = get_linear_index(row1, col1);
+	int j = get_linear_index(row2, col2);
 
+	if (i == -1 || j == -1) {
+		printf("Error: Invalid coordinate pair (%d,%d) or (%d,%d). Index out of bounds.\\n", row1, col1, row2, col2);
+		return;
+	} 
+	float c_ij = C.at<float>(i, j);
+	float c_ii = C.at<float>(i, i); 
+	float c_jj = C.at<float>(j, j);  
+
+	float sigma_i = sqrt(c_ii);
+	float sigma_j = sqrt(c_jj);
+	 
+	float rho_ij = 0.0f;
+	float denominator = sigma_i * sigma_j;
+	if (denominator > 1e-6) {
+		rho_ij = c_ij / denominator;
+	}
+	rho_ij = max(-1.0f, min(1.0f, rho_ij)); 
+
+	printf("\n--- %s ---\n", description);
+	printf("Feature 1 (row=%d, col=%d) -> Index i=%d\n", row1, col1, i);
+	printf("Feature 2 (row=%d, col=%d) -> Index j=%d\n", row2, col2, j);
+	printf("Correlation Coefficient: %.2f\n", rho_ij);
+
+	 
+	const int CHART_SIZE = 256;
+	Mat chart(CHART_SIZE, CHART_SIZE, CV_8UC1, Scalar(255));  
+	 
+	for (int k = 0; k < I.rows; k++) { 
+		int x = (int)round(I.at<float>(k, j));
+		int y = (int)round(I.at<float>(k, i));
+		 
+		if (x >= 0 && x < CHART_SIZE && y >= 0 && y < CHART_SIZE) {
+			chart.at<uchar>(y, x) = 0;
+		}
+	}
+
+	imshow(description, chart);
+	 
+} 
+void task5_analyze_all_pairs(const Mat& I) { 
+	Mat C = get_covariance_matrix(I);
+	if (C.empty()) return; 
+	analyze_feature_pair(I, C, 5, 4, 5, 14, "Task 5a (Eyes) rho ~ 0.94");
+	 
+	analyze_feature_pair(I, C, 10, 3, 9, 15, "Task 5b (Cheeks) rho ~ 0.84");
+	 
+	analyze_feature_pair(I, C, 5, 4, 18, 0, "Task 5c (Eye/Corner) rho ~ 0.07");
+}
+
+ 
 int main()
 {
 	cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_FATAL);
@@ -395,7 +455,8 @@ int main()
 	compute_and_save_mean_vector(I);
 	compute_and_save_covariance_matrix(I);
 	compute_and_save_correlation_matrix(I);
-	 
+	task5_analyze_all_pairs(I);
+
 	waitKey(0);
 	return 0;
 
