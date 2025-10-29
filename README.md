@@ -1,7 +1,7 @@
-# 🧠 Pattern Recognition Systems (PRS)
+# 🌀 Pattern Recognition Systems 
 
 This repository contains C++ implementations of key algorithms and concepts from the **Pattern Recognition Systems** course at **TUCN Cluj**.
-The code is based on laboratory exercises provided by [Prof. Ion Giosan](https://users.utcluj.ro/~igiosan/Resources/PRS/PRS_labs.pdf).
+The code is based on laboratory exercises provided by [Prof. Ion Giosan](https://users.utcluj.ro/~igiosan/teaching_prs.html).
 
 ---
 
